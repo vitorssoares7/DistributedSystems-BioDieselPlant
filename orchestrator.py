@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import random
 
 def bindSocket(server, host, port):
   try:
@@ -19,8 +20,12 @@ def management(conn, addr):
   print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if message == "get-oil":
-    res = "toma oleo"
-    print("ta pedindo oleo")
+    liters = random.randint(1, 2)
+    res = "input-oil {}".format(liters)
+    conn.sendall(res.encode())
+    conn.close()
+  elif message == "get-naoh":
+    res = "input-naoh"
     conn.sendall(res.encode())
     conn.close()
 
@@ -38,7 +43,6 @@ def main():
   bindSocket(server, host, port)
 
   while True:
-    print("esperando")
     conn, addr = server.accept()
     threading.Thread(target=management(conn, addr), args=(conn, addr))
     
