@@ -3,7 +3,6 @@ import _thread
 import threading
 import time
 
-
 def bindSocket(server, host, port):
   try:
     server.bind((host, port))
@@ -19,11 +18,9 @@ def bindSocket(server, host, port):
 
 def management(conn, addr):
   print(f"[NEW CONNECTION] {addr} connected.")
-  print("Ta saindo da jaula o monstro")
   while True:
     message = conn.recv(1024).decode() 
-    print(message)
-
+    print(message) 
 
 
 def main():
@@ -39,8 +36,8 @@ def main():
   bindSocket(server, host, port)
 
   while True:
-        conn, addr = server.accept()
-        thread =  threading.Thread(target=management(conn, addr), args=(conn, addr))
-
+    conn, addr = server.accept()
+    thread = threading.Thread(target=management(conn, addr), args=(conn, addr))
+    thread.start()
 
 main()
