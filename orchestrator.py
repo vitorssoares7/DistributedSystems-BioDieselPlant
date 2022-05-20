@@ -28,6 +28,10 @@ def management(conn, addr):
     res = "input-naoh"
     conn.sendall(res.encode())
     conn.close()
+  elif message == "get-etoh":
+    res = "input-etoh"
+    conn.sendall(res.encode())
+    conn.close()
 
 
 def main():
