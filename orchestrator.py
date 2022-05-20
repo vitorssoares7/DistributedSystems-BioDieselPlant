@@ -1,5 +1,4 @@
 import socket
-import _thread
 import threading
 import time
 
@@ -18,9 +17,12 @@ def bindSocket(server, host, port):
 
 def management(conn, addr):
   print(f"[NEW CONNECTION] {addr} connected.")
-  while True:
-    message = conn.recv(1024).decode() 
-    print(message) 
+  message = conn.recv(1024).decode()
+  if message == "get-oil":
+    res = "toma oleo"
+    print("ta pedindo oleo")
+    conn.sendall(res.encode())
+    conn.close()
 
 
 def main():
@@ -36,8 +38,9 @@ def main():
   bindSocket(server, host, port)
 
   while True:
+    print("esperando")
     conn, addr = server.accept()
-    thread = threading.Thread(target=management(conn, addr), args=(conn, addr))
-    thread.start()
+    threading.Thread(target=management(conn, addr), args=(conn, addr))
+    
 
 main()
