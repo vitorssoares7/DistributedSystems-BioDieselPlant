@@ -1,15 +1,53 @@
 import socket
 import time
+import threading
 
 class EtOHTank:
   etohAmount = 0
 
+def OpenSocket():
+  host = 'localhost'
+  port = 50007
+  client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  bindSocket(client, host, port)
+  return client
+
+def bindSocket(server, host, port):
+  try:
+    server.bind((host, port))
+    server.listen(100)
+    print('server listening on port: ' + str(port))
+
+  #auto reconnection every 3 seconds in case of errors
+  except OSError as message:
+    print('socket binding error: ' + str(message))
+    print('retrying in 3 seconds...\n')
+    time.sleep(3)
+    bindSocket(server, host, port)
+
+def management(conn, addr):
+  print(f"[NEW CONNECTION] {addr} connected.")
+  message = conn.recv(1024).decode()
+  if 'input-etoh' in message:
+    print("veio do secador")
+    EtOHTank.etohAmount+=0.285
+    res = "etoh-received"
+    conn.sendall(res.encode())
+    conn.close()
+  
+
 def main():
+  server = OpenSocket()
+  server.settimeout(0.5)
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   time_count = 0
 
   while True:
-
+    try:
+      conn, addr = server.accept()
+      threading.Thread(target=management(conn, addr), args=(conn, addr))
+    except socket.timeout:
+      pass 
     # Condition to send a request for oil every 10 seconds 
     # receiving 1 or 2 liters as response randomly
     if time_count%1 == 0:

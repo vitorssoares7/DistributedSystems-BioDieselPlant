@@ -2,15 +2,13 @@ import socket
 import time
 import threading
 
-class Reactor:
-  oil = 0
-  naoh = 0
+class Dryer:
   etoh = 0
-  processedSubstance = 0
+  isResting = False
 
 def OpenSocket():
   host = 'localhost'
-  port = 50003
+  port = 50006
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   bindSocket(client, host, port)
   return client
@@ -31,22 +29,28 @@ def bindSocket(server, host, port):
 def management(conn, addr):
   print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
-  if 'input-oil' in message:
-    Reactor.oil+=0.75
+  if 'input-etoh' in message and Dryer.isResting == False:
+    Dryer.etoh += 0.3
     res = "oil-received"
     conn.sendall(res.encode())
     conn.close()
-  elif 'input-naoh' in message:
-    Reactor.naoh+=1
-    res = "naoh-received"
-    conn.sendall(res.encode())
-    conn.close()
-  elif 'input-etoh' in message:
-    Reactor.etoh+=1
-    res = "etoh-received"
+  elif 'input-etoh' in message and Dryer.isResting == True:
+    res = "cannot-receive"
     conn.sendall(res.encode())
     conn.close()
 
+def sendEtoh(client):
+  print("tentando mandar")
+  message = "input-etoh"
+  client.connect(("localhost", 50007))
+  client.sendall(message.encode())
+  response = client.recv(1024)
+  if b'etoh-received' in response:
+    print("Saida realizada com sucesso")
+    Dryer.etoh -= 1
+  elif b'cannot-receive' in response:
+    print("EtOH tank can not receive")
+    pass
 
 def main():
   server = OpenSocket()
@@ -58,23 +62,15 @@ def main():
     conn, addr = server.accept()
     threading.Thread(target=management(conn, addr), args=(conn, addr))
     
-    if time_count%1 == 0 and Reactor.oil >= 2.5 and Reactor.naoh >= 1.25 and Reactor.etoh >= 1.25:
-      Reactor.oil -= 2.5
-      Reactor.naoh -= 1.25
-      Reactor.etoh -= 1.25
-      Reactor.processedSubstance += 5
-    
-    if time_count%10 == 0 and Reactor.processedSubstance >= 10:
-      message = "input-substance"
-      client.connect(("localhost", 50004))
-      client.sendall(message.encode())
-      response = client.recv(1024)
-      if b'substance-received' in response:
-        print("Saida realizada com sucesso")
-        Reactor.processedSubstance -= 10
-      elif b'cannot-receive' in response:
-        print("Decanter can not receive")
-        pass
+    if time_count%1 == 0 and Dryer.etoh >= 1:
+      Dryer.isResting = True
+      time.sleep(5)
+      print("to antes de mandar")
+      try:
+        sendEtoh(client)
+      except:
+        sendEtoh(client)
+      Dryer.isResting = False
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       
