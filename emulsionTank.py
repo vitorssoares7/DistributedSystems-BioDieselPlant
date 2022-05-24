@@ -28,33 +28,40 @@ def bindSocket(server, host, port):
 def management(conn, addr):
   print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
-  if 'input-emulsion' in message:
+  if 'input-1' in message:
+    print("recevi do 1")
     Emulsion.emulsion+=0.24
-    res = "oil-received"
+    res = "emulsion-received"
     conn.sendall(res.encode())
     conn.close()
-  elif 'input-emulsion2' in message:
+  elif 'input-2' in message:
+    print("recevi do 2")
     Emulsion.emulsion+=0.0375
-    res = "oil-received"
+    res = "emulsion-received"
     conn.sendall(res.encode())
     conn.close()
-  elif 'input-emulsion3' in message:
+  elif 'input-3' in message:
+    print("recevi do 3")
     Emulsion.emulsion+=0.0365625
-    res = "oil-received"
+    res = "emulsion-received"
     conn.sendall(res.encode())
     conn.close()
 
 
 def main():
   server = OpenSocket()
+  server.settimeout(0.2)
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   time_count = 0
   
 
   while True:
-    conn, addr = server.accept()
-    threading.Thread(target=management(conn, addr), args=(conn, addr))
-    print(Emulsion.emulsion)
+    try:
+      conn, addr = server.accept()
+      threading.Thread(target=management(conn, addr), args=(conn, addr))
+    except socket.timeout:
+      pass
+
     if time_count%10 == 0:
       print(Emulsion.emulsion)
     

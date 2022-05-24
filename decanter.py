@@ -5,6 +5,7 @@ import threading
 class Decanter:
   totalAmount = 0
   isResting = False
+  totalRuns = 0
   decantedSubstance = 0
 
 def OpenSocket():
@@ -54,6 +55,7 @@ def main():
     
     if time_count%1 == 0 and Decanter.totalAmount == 10:
       Decanter.isResting = True
+      Decanter.totalRuns += 1
       print("resting")
       time.sleep(5)
       Decanter.totalAmount -= 10
@@ -91,7 +93,6 @@ def main():
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-      print(Decanter.decantedSubstance)
       Decanter.isResting = False
       
       

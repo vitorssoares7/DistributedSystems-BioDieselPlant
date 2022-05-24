@@ -1,7 +1,16 @@
 import socket
-import threading
 import time
-import random
+import threading
+
+class BioTank:
+  bioDiesel = 0
+
+def OpenSocket():
+  host = 'localhost'
+  port = 50013
+  client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  bindSocket(client, host, port)
+  return client
 
 def bindSocket(server, host, port):
   try:
@@ -19,33 +28,19 @@ def bindSocket(server, host, port):
 def management(conn, addr):
   print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
-  if message == "get-oil":
-    liters = random.randint(1, 2)
-    res = "input-oil {}".format(liters)
-    conn.sendall(res.encode())
-    conn.close()
-  elif message == "get-naoh":
-    res = "input-naoh"
-    conn.sendall(res.encode())
-    conn.close()
-  elif message == "get-etoh":
-    res = "input-etoh"
+  if 'input-bio' in message:
+    BioTank.bioDiesel += 1
+    res = "bio-received"
     conn.sendall(res.encode())
     conn.close()
 
 
 def main():
-  host = 'localhost'
-  port = 50002
-
-  try:
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.settimeout(0.2)
-
-  except OSError as message:
-    print('socket creation error: ' + str(message))
-
-  bindSocket(server, host, port)
+  server = OpenSocket()
+  server.settimeout(0.2)
+  client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  time_count = 0
+  
 
   while True:
     try:
@@ -54,5 +49,13 @@ def main():
     except socket.timeout:
       pass
     
+    if time_count%10 == 0:
+      print("Total de biodiesel: ", BioTank.bioDiesel, "L")
+      
+      
+    time.sleep(1)
+    time_count += 1
+
+
 
 main()

@@ -41,19 +41,22 @@ def management(conn, addr):
 
 def main():
   server = OpenSocket()
+  server.settimeout(0.2)
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   time_count = 0
   
 
   while True:
-    conn, addr = server.accept()
-    threading.Thread(target=management(conn, addr), args=(conn, addr))
-    
+    try:
+      conn, addr = server.accept()
+      threading.Thread(target=management(conn, addr), args=(conn, addr))
+    except socket.timeout:
+      pass
     if time_count%1 == 0 and Washer1.unwashed == 9.6:
       Washer1.unwashed -= 9.6
       Washer1.washedSolution += 9.36
       Washer1.emulsion += 0.24
-      message = "input-emulsion"
+      message = "input-1"
       client.connect(("localhost", 50009))
       client.sendall(message.encode())
       response = client.recv(1024)

@@ -41,23 +41,27 @@ def management(conn, addr):
 
 def main():
   server = OpenSocket()
+  server.settimeout(0.2)
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   time_count = 0
   
 
   while True:
-    conn, addr = server.accept()
-    threading.Thread(target=management(conn, addr), args=(conn, addr))
-    
+    try:
+      conn, addr = server.accept()
+      threading.Thread(target=management(conn, addr), args=(conn, addr))
+    except socket.timeout:
+      pass
+
     if time_count%1 == 0 and Washer2.unwashed == 1.5:
       Washer2.unwashed -= 1.5
-      Washer2.washedSolution -= 1.4625
+      Washer2.washedSolution += 1.4625
       Washer2.emulsion += 0.0375
-      message = "input-emulsion2"
+      message = "input-2"
       client.connect(("localhost", 50009))
       client.sendall(message.encode())
       response = client.recv(1024)
-      if b'emulsion2-received' in response:
+      if b'emulsion-received' in response:
         Washer2.emulsion -= 0.0375
       elif b'cannot-receive' in response:
         print("Emulsion tank can not receive")
@@ -65,7 +69,9 @@ def main():
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    if time_count%1 == 0 and Washer2.washedSolution >= 1.4625:
+    print(Washer2.washedSolution)
+
+    if time_count%1 == 0 and Washer2.washedSolution == 1.4625:
       print("vou mandar pro 3")
       message = "input-solution"
       client.connect(("localhost", 50011))

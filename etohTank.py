@@ -38,7 +38,7 @@ def management(conn, addr):
 
 def main():
   server = OpenSocket()
-  server.settimeout(0.5)
+  server.settimeout(0.2)
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   time_count = 0
 
