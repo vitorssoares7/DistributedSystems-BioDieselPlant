@@ -69,8 +69,6 @@ def main():
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    print(Washer2.washedSolution)
-
     if time_count%1 == 0 and Washer2.washedSolution == 1.4625:
       print("vou mandar pro 3")
       message = "input-solution"

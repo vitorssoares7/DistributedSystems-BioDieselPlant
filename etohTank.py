@@ -26,10 +26,8 @@ def bindSocket(server, host, port):
     bindSocket(server, host, port)
 
 def management(conn, addr):
-  print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if 'input-etoh' in message:
-    print("veio do secador")
     EtOHTank.etohAmount+=0.285
     res = "etoh-received"
     conn.sendall(res.encode())
@@ -61,6 +59,13 @@ def main():
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    if time_count%10 == 0:
+      message = "EtOH-status:\nEtOH in the tank: {} L\n".format(EtOHTank.etohAmount)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     #Sends oil to the reactor every second if oilAmount<0.75 and checks if the reactor
     #can receive it
     if time_count%1 == 0:
@@ -71,7 +76,6 @@ def main():
         client.sendall(message.encode())
         response = client.recv(1024)
         if b'etoh-received' in response:
-          print("saida realizada com sucesso")
           EtOHTank.etohAmount-=1
         elif b'cannot-receive' in response:
           print("reactor could not receive")

@@ -26,7 +26,6 @@ def bindSocket(server, host, port):
     bindSocket(server, host, port)
 
 def management(conn, addr):
-  print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if 'input-1' in message:
     print("recevi do 1")
@@ -64,6 +63,13 @@ def main():
 
     if time_count%10 == 0:
       print(Emulsion.emulsion)
+
+    if time_count%10 == 0:
+      message = "Emulsion-status:\nTotal emulsion: {} L\n".format(Emulsion.emulsion)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
       
     time.sleep(1)

@@ -54,13 +54,17 @@ def sendEtoh(client):
 
 def main():
   server = OpenSocket()
+  server.settimeout(0.2)
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   time_count = 0
   
 
   while True:
-    conn, addr = server.accept()
-    threading.Thread(target=management(conn, addr), args=(conn, addr))
+    try:
+      conn, addr = server.accept()
+      threading.Thread(target=management(conn, addr), args=(conn, addr))
+    except socket.timeout:
+      pass
     
     if time_count%1 == 0 and Dryer.etoh >= 1:
       Dryer.isResting = True

@@ -5,7 +5,7 @@ import threading
 class Decanter:
   totalAmount = 0
   isResting = False
-  totalRuns = 0
+  cicles = 0
   decantedSubstance = 0
 
 def OpenSocket():
@@ -29,7 +29,6 @@ def bindSocket(server, host, port):
     bindSocket(server, host, port)
 
 def management(conn, addr):
-  print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if 'input-substance' in message and Decanter.isResting == False:
     Decanter.totalAmount+=10
@@ -55,9 +54,10 @@ def main():
     
     if time_count%1 == 0 and Decanter.totalAmount == 10:
       Decanter.isResting = True
-      Decanter.totalRuns += 1
+      Decanter.cicles += 1
       print("resting")
       time.sleep(5)
+      print("finished resting")
       Decanter.totalAmount -= 10
       Decanter.decantedSubstance += 10
 
@@ -94,6 +94,13 @@ def main():
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
       Decanter.isResting = False
+
+    if time_count%10 == 0:
+      message = "Decanter-status:\nNumber of cicles: {}\n".format(Decanter.cicles)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       
       
     time.sleep(1)

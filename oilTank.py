@@ -15,13 +15,20 @@ def main():
       client.connect(("localhost", 50002))
       client.sendall(message.encode())
       response = client.recv(1024)
-      print(response)
       if b'input-oil' in response and b'1' in response:
         oilAmount+=1
         print("total de oleo: ", oilAmount)
       else:
         oilAmount+=2
         print("total de oleo: ", oilAmount)
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    
+    if time_count%10 == 0:
+      message = "Oil-status:\nOil in the tank: {} L\n".format(oilAmount)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -35,7 +42,6 @@ def main():
         client.sendall(message.encode())
         response = client.recv(1024)
         if b'oil-received' in response:
-          print("saida realizada com sucesso")
           oilAmount-=0.75
         elif b'cannot-receive' in response:
           print("reactor could not receive")

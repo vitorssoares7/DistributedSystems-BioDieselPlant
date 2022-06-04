@@ -17,7 +17,6 @@ def bindSocket(server, host, port):
     bindSocket(server, host, port)
 
 def management(conn, addr):
-  print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if message == "get-oil":
     liters = random.randint(1, 2)
@@ -31,6 +30,9 @@ def management(conn, addr):
   elif message == "get-etoh":
     res = "input-etoh"
     conn.sendall(res.encode())
+    conn.close()
+  elif "status" in message:
+    print(message)
     conn.close()
 
 

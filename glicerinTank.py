@@ -26,7 +26,6 @@ def bindSocket(server, host, port):
     bindSocket(server, host, port)
 
 def management(conn, addr):
-  print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if 'input-glicerin' in message:
     GlicerinTank.glicerin += 0.1
@@ -37,16 +36,27 @@ def management(conn, addr):
 
 def main():
   server = OpenSocket()
+  server.settimeout(0.2)
   client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   time_count = 0
   
 
   while True:
-    conn, addr = server.accept()
-    threading.Thread(target=management(conn, addr), args=(conn, addr))
+    try:
+      conn, addr = server.accept()
+      threading.Thread(target=management(conn, addr), args=(conn, addr))
+    except socket.timeout:
+      pass
     
     if time_count%1 == 0:
       print("Total de glicerina: ", GlicerinTank.glicerin, "L")
+
+    if time_count%10 == 0:
+      message = "Glicerin-status:\nGlicerin produced: {} L\n".format(GlicerinTank.glicerin)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       
       
     time.sleep(1)

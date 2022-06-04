@@ -7,6 +7,7 @@ class Reactor:
   naoh = 0
   etoh = 0
   processedSubstance = 0
+  cicles = 0
 
 def OpenSocket():
   host = 'localhost'
@@ -29,7 +30,6 @@ def bindSocket(server, host, port):
     bindSocket(server, host, port)
 
 def management(conn, addr):
-  print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if 'input-oil' in message:
     Reactor.oil+=0.75
@@ -63,6 +63,7 @@ def main():
       Reactor.naoh -= 1.25
       Reactor.etoh -= 1.25
       Reactor.processedSubstance += 5
+      Reactor.cicles+=1
     
     if time_count%10 == 0 and Reactor.processedSubstance >= 10:
       message = "input-substance"
@@ -70,11 +71,18 @@ def main():
       client.sendall(message.encode())
       response = client.recv(1024)
       if b'substance-received' in response:
-        print("Saida realizada com sucesso")
+        print("Substancia enviada ao decantador")
         Reactor.processedSubstance -= 10
       elif b'cannot-receive' in response:
         print("Decanter can not receive")
         pass
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    if time_count%10 == 0:
+      message = "Reactor-status:\nNumbers of cicles: {}\n".format(Reactor.cicles)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       

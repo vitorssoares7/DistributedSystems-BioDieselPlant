@@ -26,7 +26,6 @@ def bindSocket(server, host, port):
     bindSocket(server, host, port)
 
 def management(conn, addr):
-  print(f"[NEW CONNECTION] {addr} connected.")
   message = conn.recv(1024).decode()
   if 'input-bio' in message:
     BioTank.bioDiesel += 1
@@ -51,6 +50,13 @@ def main():
     
     if time_count%10 == 0:
       print("Total de biodiesel: ", BioTank.bioDiesel, "L")
+
+    if time_count%10 == 0:
+      message = "Biodiesel-status:\nBiodiesel produced: {} L\n".format(BioTank.bioDiesel)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       
       
     time.sleep(1)

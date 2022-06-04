@@ -15,10 +15,17 @@ def main():
       client.connect(("localhost", 50002))
       client.sendall(message.encode())
       response = client.recv(1024)
-      print(response)
       if b'input-naoh' in response:
         naohAmount+=0.5
         print("total de naoh: ", naohAmount)
+      client.close()
+      client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+
+    if time_count%10 == 0:
+      message = "NaOH-status:\nNaOH in the tank: {} L\n".format(naohAmount)
+      client.connect(("localhost", 50002))
+      client.sendall(message.encode())
       client.close()
       client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -32,7 +39,6 @@ def main():
         client.sendall(message.encode())
         response = client.recv(1024)
         if b'naoh-received' in response:
-          print("saida realizada com sucesso")
           naohAmount-=1
         elif b'cannot-receive' in response:
           print("reactor could not receive")
